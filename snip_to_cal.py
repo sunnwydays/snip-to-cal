@@ -26,14 +26,14 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent
 CAPTURES = ROOT / "captures"
 LOG = ROOT / "log.jsonl"
-TZ = "America/Toronto"
-MODEL = "claude-haiku-5-5"
-REMINDER_MIN = 60
-SNIP_TIMEOUT_S = 60
-CROP_PCT = 0.10  # padding removed from each screen edge in the default mode
+TZ = "America/Toronto"		# event timezone
+MODEL = "claude-haiku-5-5"	# reads the screenshot
+REMINDER_MIN = 60			# popup reminder, min before start
+SNIP_TIMEOUT_S = 60			# --snip wait limit, seconds
+CROP_PCT = 0.10				# trimmed per screen edge (10%)
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-HIDE_TIME_EVENT_ADDED = 5
-HIDE_TIME_NO_EVENT = 5
+HIDE_TIME_EVENT_ADDED = 5	# card seconds after adding
+HIDE_TIME_NO_EVENT = 5		# card seconds when nothing found
 
 # ---------------------------------------------------------------- Google auth
 
