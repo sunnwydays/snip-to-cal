@@ -1,0 +1,7 @@
+anthropic
+google-api-python-client
+google-auth-oauthlib
+pillow
+pywin32
+tzdata
+python-dotenv
