@@ -4,7 +4,8 @@ Run once per snip (AutoHotkey hotkey). Opens the Windows snip overlay, waits for
 the image on the clipboard, asks Haiku for the events, adds them to Google
 Calendar with a 60-min popup reminder, then shows a card with Undo.
 
-python snip_to_cal.py            normal run (snip overlay)
+python snip_to_cal.py            grab the screen center (10% cropped per side)
+python snip_to_cal.py --snip     manual snip overlay instead
 python snip_to_cal.py img.png    use an image file instead (testing)
 python snip_to_cal.py --auth     sign in to Google once
 """
@@ -29,7 +30,10 @@ TZ = "America/Toronto"
 MODEL = "claude-haiku-5-5"
 REMINDER_MIN = 60
 SNIP_TIMEOUT_S = 60
+CROP_PCT = 0.10  # padding removed from each screen edge in the default mode
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+HIDE_TIME_EVENT_ADDED = 5
+HIDE_TIME_NO_EVENT = 5
 
 # ---------------------------------------------------------------- Google auth
 
@@ -56,6 +60,20 @@ def calendar_service():
     return build("calendar", "v3", credentials=creds, cache_discovery=False)
 
 # ---------------------------------------------------------------- snip
+
+def screen_image():
+    """Grab the primary screen, minus CROP_PCT padding on every side."""
+    from PIL import ImageGrab
+
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)  # real pixels, not scaled
+    except Exception:
+        pass
+    img = ImageGrab.grab()
+    w, h = img.size
+    dx, dy = int(w * CROP_PCT), int(h * CROP_PCT)
+    return img.crop((dx, dy, w - dx, h - dy))
+
 
 def snip_image():
     """Open the snip overlay and return the new clipboard image (or None)."""
@@ -265,12 +283,14 @@ def log(row):
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-def run(image_path=None):
+def run(image_path=None, manual=False):
     if image_path:
         from PIL import Image
         img = Image.open(image_path)
-    else:
+    elif manual:
         img = snip_image()
+    else:
+        img = screen_image()
     if img is None:
         return  # cancelled / timed out: stay silent
 
@@ -328,7 +348,7 @@ def run(image_path=None):
         if not created:
             card.show(lambda: (card.label("No events found", bold=True),
                                card.label(state.get("none_reason") or "", fg=DIM),
-                               card.buttons([("Close", card.root.destroy)])), close_after=8)
+                               card.buttons([("Close", card.root.destroy)])), close_after=HIDE_TIME_NO_EVENT)
             return
 
         def build():
@@ -343,7 +363,7 @@ def run(image_path=None):
             card.buttons([("Undo", undo),
                           ("Open", lambda: (webbrowser.open(created[0]["link"]), card.root.destroy())),
                           ("Close", card.root.destroy)])
-        card.show(build, close_after=5)
+        card.show(build, close_after=HIDE_TIME_EVENT_ADDED)
 
     threading.Thread(target=work, daemon=True).start()
     card.root.mainloop()
@@ -355,7 +375,8 @@ if __name__ == "__main__":
         print("signed in, token.json saved")
     else:
         try:
-            run(sys.argv[1] if len(sys.argv) > 1 else None)
+            args = [a for a in sys.argv[1:] if not a.startswith("--")]
+            run(args[0] if args else None, manual="--snip" in sys.argv)
         except Exception:  # pythonw has no console: keep the error somewhere visible
             (ROOT / "error.log").open("a", encoding="utf-8").write(
                 f"--- {dt.datetime.now():%Y-%m-%d %H:%M:%S}\n{traceback.format_exc()}")

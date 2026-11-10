@@ -10,13 +10,14 @@ Windows tool: press a hotkey, snip any text with dates (email, syllabus, announc
 4. Put your Google OAuth desktop `credentials.json` in this folder.
 5. `.venv\Scripts\python snip_to_cal.py --auth` (one-time Google sign-in)
 6. Optional hotkey, in AutoHotkey v1:
-   `!+,::Run "<folder>\.venv\Scripts\pythonw.exe" "<folder>\snip_to_cal.py"`
+   `!r::Run "<folder>\.venv\Scripts\pythonw.exe" "<folder>\snip_to_cal.py"`
 
 ## Run
 
-- `python snip_to_cal.py`: snip and add events
+- `python snip_to_cal.py`: grab the screen center (10% cropped off each side) and add events
+- `python snip_to_cal.py --snip`: drag a manual snip instead
 - `python snip_to_cal.py img.png`: test on an existing image
 
 ## Tech
 
-Python 3.12, Claude Haiku (Anthropic API), Google Calendar API, Windows Snipping Tool (`ms-screenclip`), pywin32, tkinter, AutoHotkey.
+Python, Claude Haiku (Anthropic API), Google Calendar API, Windows Snipping Tool (`ms-screenclip`), pywin32, tkinter, AutoHotkey.
