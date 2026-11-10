@@ -12,6 +12,10 @@ Windows tool: press a hotkey, snip any text with dates (email, syllabus, announc
 6. Optional hotkey, in AutoHotkey v1:
    `!r::Run "<folder>\.venv\Scripts\pythonw.exe" "<folder>\snip_to_cal.py"`
 
+## Tray icon
+
+`.venv\Scripts\pythonw.exe tray.py` puts an icon in the system tray: click to snip the screen, right-click for manual snip / quit. To start at login, put a shortcut to that command in `shell:startup`.
+
 ## Run
 
 - `python snip_to_cal.py`: grab the screen center (10% cropped off each side) and add events

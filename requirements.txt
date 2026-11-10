@@ -5,3 +5,4 @@ pillow
 pywin32
 tzdata
 python-dotenv
+pystray
